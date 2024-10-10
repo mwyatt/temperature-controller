@@ -1,0 +1,71 @@
+# exit('dont run')
+
+import os
+import time
+import pickle
+import sqlite3
+
+# import constants from py file
+from constants import *
+
+con = sqlite3.connect(DB_NAME)
+cur = con.cursor()
+
+# get start time
+start_time = time.time()
+
+run_time = 59
+sleep_time = 5
+
+# loop infinitely
+while True:
+
+    # get all settings stored
+    cur.execute("SELECT * FROM settings")
+    settings = dict(cur.fetchall())
+
+    # get current time
+    current_time = time.strftime("%Y-%m-%d %H:%M:%S")
+    
+    # get target temperature
+    target_temp = int(settings["target_temp"])
+    
+    # get current temperature
+    current_temp = float(settings['current_temp'])
+
+    # compare current temperature to target temperature
+    heater_status = "on" if current_temp < target_temp else "off"
+
+    # if heater is on increment otherwise decrement
+    current_temp += 1 if heater_status == "on" else -1
+
+    epoch_time = int(time.time())
+
+    # store the results in the database
+    cur.execute(
+        """
+        INSERT INTO temp_history (current_temp, heater_on, timestamp)
+        VALUES (?, ?, ?)
+        """,
+        (current_temp, heater_status == "on", epoch_time)
+    )
+
+    # store current temp setting
+    cur.execute(
+        """
+        UPDATE settings
+        SET value = ?
+        WHERE key = 'current_temp'
+        """,
+        (str(current_temp),)
+    )
+
+    con.commit()
+
+    print(f"Current temp: {current_temp}, Heater: {heater_status}, Time: {current_time}, Target: {target_temp}")
+
+    time.sleep(sleep_time)
+    
+    # check if runtime has elapsed
+    if time.time() - start_time >= run_time:
+        break

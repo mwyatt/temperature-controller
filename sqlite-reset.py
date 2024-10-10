@@ -1,0 +1,11 @@
+import sqlite3
+import constants
+
+con = sqlite3.connect(constants.DB_NAME)
+cur = con.cursor()
+
+# drop all tables
+# cur.execute("DROP TABLE IF EXISTS settings")
+cur.execute("DROP TABLE IF EXISTS temp_history")
+
+con.commit()
