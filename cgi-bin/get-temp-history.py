@@ -6,6 +6,9 @@ import sqlite3
 import time
 from calendar import timegm
 import sys
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # ???
 sys.path.append('/home/martin/Sites/temperature-controller/')

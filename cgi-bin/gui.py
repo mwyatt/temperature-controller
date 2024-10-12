@@ -3,6 +3,9 @@
 import os
 import sqlite3
 import sys
+from dotenv import load_dotenv
+
+load_dotenv()
 
 sys.path.append('/home/martin/Sites/temperature-controller/')
 

@@ -1,5 +1,8 @@
 import sqlite3
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 con = sqlite3.connect(os.getenv('DB_NAME'))
 cur = con.cursor()
