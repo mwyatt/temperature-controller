@@ -1,9 +1,10 @@
-# exit('dont run')
+exit('dont run')
 
 import os
 import time
 import pickle
 import sqlite3
+import RPi.GPIO as GPIO
 
 # import constants from py file
 from constants import *
@@ -16,6 +17,11 @@ start_time = time.time()
 
 run_time = 59
 sleep_time = 5
+
+# setup gpio for heater
+heater_gpio = 2
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(heater_gpio, GPIO.OUT)
 
 # loop infinitely
 while True:
@@ -38,6 +44,9 @@ while True:
 
     # if heater is on increment otherwise decrement
     current_temp += 1 if heater_status == "on" else -1
+
+    # if heater is on turn it on otherwise don't
+    GPIO.output(heater_gpio, heater_status == "on")
 
     epoch_time = int(time.time())
 
