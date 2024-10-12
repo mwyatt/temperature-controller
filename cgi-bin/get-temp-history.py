@@ -7,10 +7,10 @@ import time
 from calendar import timegm
 import sys
 
+# ???
 sys.path.append('/home/martin/Sites/temperature-controller/')
-from constants import *
 
-con = sqlite3.connect(DB_NAME)
+con = sqlite3.connect(os.getenv('DB_NAME'))
 cur = con.cursor()
 
 # get query string

@@ -1,7 +1,7 @@
+import os
 import sqlite3
-import constants
 
-con = sqlite3.connect(constants.DB_NAME)
+con = sqlite3.connect(os.getenv('DB_NAME'))
 cur = con.cursor()
 
 cur.execute(

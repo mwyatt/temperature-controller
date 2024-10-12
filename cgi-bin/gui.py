@@ -5,10 +5,9 @@ import sqlite3
 import sys
 
 sys.path.append('/home/martin/Sites/temperature-controller/')
-from constants import *
 
 # get settings from the database    
-con = sqlite3.connect(DB_NAME)
+con = sqlite3.connect(os.getenv('DB_NAME'))
 cur = con.cursor()
 
 # get all settings stored

@@ -1,15 +1,24 @@
-exit('dont run')
+# exit('cron is off')
 
 import os
 import time
 import pickle
 import sqlite3
-import RPi.GPIO as GPIO
+from pathlib import Path
+from inspect import getmembers
+from pprint import pprint
+import importlib.util
+from dotenv import load_dotenv
 
-# import constants from py file
-from constants import *
+load_dotenv()
 
-con = sqlite3.connect(DB_NAME)
+# check if running in rasberry pi environment
+RPi_spec = importlib.util.find_spec("RPi")
+is_rasberry_pi_enviroment = RPi_spec != None
+if is_rasberry_pi_enviroment:
+    import RPi.GPIO as GPIO
+
+con = sqlite3.connect(os.getenv('DB_NAME'))
 cur = con.cursor()
 
 # get start time
@@ -17,11 +26,12 @@ start_time = time.time()
 
 run_time = 59
 sleep_time = 5
+heater_gpio_pin = 21
 
 # setup gpio for heater
-heater_gpio = 2
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(heater_gpio, GPIO.OUT)
+if is_rasberry_pi_enviroment:
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(heater_gpio_pin, GPIO.OUT)
 
 # loop infinitely
 while True:
@@ -37,16 +47,22 @@ while True:
     target_temp = int(settings["target_temp"])
     
     # get current temperature
-    current_temp = float(settings['current_temp'])
+    # current_temp = float(settings['current_temp'])
+
+    # get current temperature from sensor
+    current_temp = Path(os.getenv('TEMPERATURE_FILE_PATH')).read_text()
+    current_temp = int(current_temp) / 1000 # 20.753
+    current_temp = round(current_temp, 1) # 20.8
 
     # compare current temperature to target temperature
     heater_status = "on" if current_temp < target_temp else "off"
 
     # if heater is on increment otherwise decrement
-    current_temp += 1 if heater_status == "on" else -1
+    # current_temp += 1 if heater_status == "on" else -1
 
-    # if heater is on turn it on otherwise don't
-    GPIO.output(heater_gpio, heater_status == "on")
+    # if heater should be on turn it on otherwise don't
+    if is_rasberry_pi_enviroment:
+        GPIO.output(heater_gpio_pin, heater_status == "on")
 
     epoch_time = int(time.time())
 

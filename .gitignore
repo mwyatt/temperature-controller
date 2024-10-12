@@ -1,3 +1,5 @@
 database.db
 cron.log
 __pycache__
+.env
+temperature
