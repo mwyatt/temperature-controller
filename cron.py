@@ -57,6 +57,7 @@ while True:
 
     # compare current temperature to target temperature
     heater_status = "on" if current_temp < target_temp else "off"
+    # print(heater_status)
 
     # if heater is on increment otherwise decrement
     # current_temp += 1 if heater_status == "on" else -1
@@ -66,9 +67,9 @@ while True:
         GPIO.output(heater_gpio_pin, heater_status == "on")
 
     #  cleanup allows turn off of pin output to be registered
-    if heater_status != "on":
+    if is_rasberry_pi_enviroment and GPIO.input(heater_gpio_pin) == 0:
         GPIO.cleanup()
-
+    
     epoch_time = int(time.time())
 
     # store the results in the database
