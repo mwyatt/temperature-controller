@@ -1,4 +1,4 @@
-# exit('cron is off')
+exit('cron is off')
 
 import os
 import time
@@ -26,15 +26,15 @@ start_time = time.time()
 
 run_time = 59
 sleep_time = 5
-heater_gpio_pin = os.getenv('CERAMIC_HEATER_GPIO_PIN')
-
-# setup gpio for heater
-if is_rasberry_pi_enviroment:
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(heater_gpio_pin, GPIO.OUT)
+heater_gpio_pin = int(os.getenv('CERAMIC_HEATER_GPIO_PIN'))
 
 # loop infinitely
 while True:
+
+    # setup gpio for heater
+    if is_rasberry_pi_enviroment:
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(heater_gpio_pin, GPIO.OUT)
 
     # get all settings stored
     cur.execute("SELECT * FROM settings")
@@ -63,6 +63,9 @@ while True:
     # if heater should be on turn it on otherwise don't
     if is_rasberry_pi_enviroment:
         GPIO.output(heater_gpio_pin, heater_status == "on")
+
+    # cleanup
+#    GPIO.cleanup()
 
     epoch_time = int(time.time())
 
@@ -94,3 +97,4 @@ while True:
     # check if runtime has elapsed
     if time.time() - start_time >= run_time:
         break
+
