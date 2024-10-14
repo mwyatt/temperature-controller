@@ -32,10 +32,6 @@ heater_gpio_pin = int(os.getenv('CERAMIC_HEATER_GPIO_PIN'))
 # loop infinitely
 while True:
 
-    # setup gpio for heater
-    if is_rasberry_pi_enviroment:
-        GPIO.setmode(GPIO.BCM)
-
     # get all settings stored
     cur.execute("SELECT * FROM settings")
     settings = dict(cur.fetchall())
@@ -66,12 +62,11 @@ while True:
 
     # if heater should be on turn it on otherwise don't
     if is_rasberry_pi_enviroment:
-        GPIO.output(heater_gpio_pin, heater_status == "on")
+        GPIO.setmode(GPIO.BCM)
+        GPIO.output(heater_gpio_pin, True if heater_status == "on" else False)
+        if GPIO.input(heater_gpio_pin) == 0:
+            GPIO.cleanup()
 
-    #  cleanup allows turn off of pin output to be registered
-    if is_rasberry_pi_enviroment and GPIO.input(heater_gpio_pin) == 0:
-        GPIO.cleanup()
-    
     epoch_time = int(time.time())
 
     # store the results in the database
