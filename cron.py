@@ -54,8 +54,6 @@ while True:
     heater_status = "on" if current_temp < target_temp else "off"
     # print(heater_status)
 
-    if heater_status == "on" and is_rasberry_pi_enviroment:
-        GPIO.setup(heater_gpio_pin, GPIO.OUT)
 
     # if heater is on increment otherwise decrement
     # current_temp += 1 if heater_status == "on" else -1
@@ -63,6 +61,7 @@ while True:
     # if heater should be on turn it on otherwise don't
     if is_rasberry_pi_enviroment:
         GPIO.setmode(GPIO.BCM)
+        GPIO.setup(heater_gpio_pin, GPIO.OUT)
         GPIO.output(heater_gpio_pin, True if heater_status == "on" else False)
         if GPIO.input(heater_gpio_pin) == 0:
             GPIO.cleanup()
