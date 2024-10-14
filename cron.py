@@ -26,7 +26,7 @@ start_time = time.time()
 
 run_time = 59
 sleep_time = 5
-heater_gpio_pin = 21
+heater_gpio_pin = os.getenv('CERAMIC_HEATER_GPIO_PIN')
 
 # setup gpio for heater
 if is_rasberry_pi_enviroment:
