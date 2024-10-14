@@ -1,4 +1,4 @@
-exit('cron is off')
+# exit('cron is off')
 
 import os
 import time
@@ -17,6 +17,7 @@ RPi_spec = importlib.util.find_spec("RPi")
 is_rasberry_pi_enviroment = RPi_spec != None
 if is_rasberry_pi_enviroment:
     import RPi.GPIO as GPIO
+    GPIO.setwarnings(False)
 
 con = sqlite3.connect(os.getenv('DB_NAME'))
 cur = con.cursor()
@@ -64,8 +65,9 @@ while True:
     if is_rasberry_pi_enviroment:
         GPIO.output(heater_gpio_pin, heater_status == "on")
 
-    # cleanup
-#    GPIO.cleanup()
+    #  cleanup allows turn off of pin output to be registered
+    if heater_status != "on":
+        GPIO.cleanup()
 
     epoch_time = int(time.time())
 
