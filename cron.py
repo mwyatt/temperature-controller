@@ -9,8 +9,28 @@ from inspect import getmembers
 from pprint import pprint
 import importlib.util
 from dotenv import load_dotenv
+import asyncio
+from tapo import ApiClient
 
 load_dotenv()
+
+tapo_username = os.getenv('TAPO_USERNAME')
+tapo_password = os.getenv('TAPO_PASSWORD')
+ip_address = os.getenv('TAPO_HEATER_IP_ADDRESS')
+client = ApiClient(tapo_username, tapo_password)
+
+async def turnHeaterOff():
+    device = await client.p100(ip_address)
+    await device.off()
+
+async def turnHeaterOn():
+    device = await client.p100(ip_address)
+    await device.on()
+    # device_info = await device.get_device_info()
+    # print(f"Device info: {device_info.to_dict()}")
+
+    # device_usage = await device.get_device_usage()
+    # print(f"Device usage: {device_usage.to_dict()}")
 
 # check if running in rasberry pi environment
 RPi_spec = importlib.util.find_spec("RPi")
@@ -59,12 +79,11 @@ while True:
     # current_temp += 1 if heater_status == "on" else -1
 
     # if heater should be on turn it on otherwise don't
-    if is_rasberry_pi_enviroment:
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(heater_gpio_pin, GPIO.OUT)
-        GPIO.output(heater_gpio_pin, True if heater_status == "on" else False)
-        if GPIO.input(heater_gpio_pin) == 0:
-            GPIO.cleanup()
+    if heater_status == "on":
+        asyncio.run(turnHeaterOn())
+
+    if heater_status == "off":
+        asyncio.run(turnHeaterOff())
 
     epoch_time = int(time.time())
 
