@@ -12,71 +12,56 @@ from dotenv import load_dotenv
 import asyncio
 from tapo import ApiClient
 
-load_dotenv()
+# load environment variables
+load_dotenv('TempProject/.env')
 
-tapo_username = os.getenv('TAPO_USERNAME')
+base_path = os.getenv('BASE_PATH')
+db_name = os.getenv('DB_NAME')
+tapo_username = str(os.getenv('TAPO_USERNAME'))
 tapo_password = os.getenv('TAPO_PASSWORD')
-ip_address = os.getenv('TAPO_HEATER_IP_ADDRESS')
-client = ApiClient(tapo_username, tapo_password)
+tapo_ip_address = os.getenv('TAPO_HEATER_IP_ADDRESS')
+
+# create a tapo api client
+tapo_client = ApiClient(tapo_username, tapo_password)
 
 async def turnHeaterOff():
-    device = await client.p100(ip_address)
+    device = await tapo_client.p100(tapo_ip_address)
     await device.off()
 
 async def turnHeaterOn():
-    device = await client.p100(ip_address)
+    device = await tapo_client.p100(tapo_ip_address)
     await device.on()
-    # device_info = await device.get_device_info()
-    # print(f"Device info: {device_info.to_dict()}")
 
-    # device_usage = await device.get_device_usage()
-    # print(f"Device usage: {device_usage.to_dict()}")
-
-# check if running in rasberry pi environment
-RPi_spec = importlib.util.find_spec("RPi")
-is_rasberry_pi_enviroment = RPi_spec != None
-if is_rasberry_pi_enviroment:
-    import RPi.GPIO as GPIO
-    GPIO.setwarnings(False)
-
-con = sqlite3.connect(os.getenv('DB_NAME'))
+con = sqlite3.connect(db_name)
 cur = con.cursor()
 
-# get start time
+# times
 start_time = time.time()
-
 run_time = 59
 sleep_time = 5
-heater_gpio_pin = int(os.getenv('CERAMIC_HEATER_GPIO_PIN'))
 
 # loop infinitely
 while True:
 
     # get all settings stored
-    cur.execute("SELECT * FROM settings")
-    settings = dict(cur.fetchall())
+    cur.execute("SELECT * FROM tempapp_settings")
+    settings = cur.fetchall()
+
+    # get on and off temperatures
+    on_temp = float(settings[0][2])
+    off_temp = float(settings[1][2])
 
     # get current time
     current_time = time.strftime("%Y-%m-%d %H:%M:%S")
     
-    # get target temperature
-    target_temp = int(settings["target_temp"])
-    
-    # get current temperature
-    # current_temp = float(settings['current_temp'])
-
     # get current temperature from sensor
     current_temp = Path(os.getenv('TEMPERATURE_FILE_PATH')).read_text()
     current_temp = int(current_temp) / 1000 # 20.753
     current_temp = round(current_temp, 1) # 20.8
 
     # compare current temperature to target temperature
-    heater_status = "on" if current_temp < target_temp else "off"
-    # print(heater_status)
-
-
-    # if heater is on increment otherwise decrement
-    # current_temp += 1 if heater_status == "on" else -1
+    heater_status = "on" if current_temp < on_temp else "off"
+    heater_status = "off" if current_temp > off_temp else "on"
 
     # if heater should be on turn it on otherwise don't
     if heater_status == "on":
@@ -90,25 +75,15 @@ while True:
     # store the results in the database
     cur.execute(
         """
-        INSERT INTO temp_history (current_temp, heater_on, timestamp)
+        INSERT INTO tempapp_temphistory (current_temp, heater_on, time_created)
         VALUES (?, ?, ?)
         """,
         (current_temp, heater_status == "on", epoch_time)
     )
 
-    # store current temp setting
-    cur.execute(
-        """
-        UPDATE settings
-        SET value = ?
-        WHERE key = 'current_temp'
-        """,
-        (str(current_temp),)
-    )
-
     con.commit()
 
-    print(f"Current temp: {current_temp}, Heater: {heater_status}, Time: {current_time}, Target: {target_temp}")
+    print(f"Current temp: {current_temp}, Heater Status: {heater_status}, On Temp: {on_temp}, Off Temp: {off_temp}, Time: {current_time}")
 
     time.sleep(sleep_time)
     

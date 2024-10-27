@@ -1,6 +1,5 @@
-database.db
-database.db-journal
 cron.log
 __pycache__
 .env
 temperature
+db.sqlite3
