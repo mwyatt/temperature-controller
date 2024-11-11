@@ -13,10 +13,10 @@ import asyncio
 from tapo import ApiClient
 
 # load environment variables
-load_dotenv('TempProject/.env')
+load_dotenv('/home/martin/Sites/temperature-controller/TempProject/.env')
 
 base_path = os.getenv('BASE_PATH')
-db_name = os.getenv('DB_NAME')
+db_name = base_path + os.getenv('DB_NAME')
 tapo_username = str(os.getenv('TAPO_USERNAME'))
 tapo_password = os.getenv('TAPO_PASSWORD')
 tapo_ip_address = os.getenv('TAPO_HEATER_IP_ADDRESS')

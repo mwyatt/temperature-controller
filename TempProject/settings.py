@@ -30,7 +30,10 @@ SECRET_KEY = 'django-insecure-=jzt4k9@t#_hvjbji$2g&%k%$-#844j$mbvy07y=20b!wd-r8l
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'temperature-controller.local',
+    '192.168.1.227'
+]
 
 
 # Application definition
