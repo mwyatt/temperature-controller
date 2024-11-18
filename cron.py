@@ -82,6 +82,9 @@ while True:
 
     epoch_time = int(time.time())
 
+    # Store the current heater status to refer to in the next loop
+    previous_heater_status = heater_status
+
     # store the results in the database
     cur.execute(
         """
