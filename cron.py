@@ -40,8 +40,13 @@ start_time = time.time()
 run_time = 59
 sleep_time = 5
 
+previous_heater_status = None
+
 # loop infinitely
 while True:
+    if previous_heater_status == None:
+        cur.execute("SELECT current_temp, heater_on, time_created FROM tempapp_temphistory ORDER BY id DESC LIMIT 1")
+        previous_heater_status = "on" if cur.fetchall()[0][1] == 1 else "off"
 
     # get all settings stored
     cur.execute("SELECT * FROM tempapp_settings")
@@ -60,15 +65,20 @@ while True:
     current_temp = round(current_temp, 1) # 20.8
 
     # compare current temperature to target temperature
-    heater_status = "on" if current_temp < on_temp else "off"
-    heater_status = "off" if current_temp > off_temp else "on"
+    heater_status = previous_heater_status
+
+    # Heater is on if current temp is less than the on temp
+    if current_temp < on_temp:
+        heater_status = "on"
+    if current_temp > off_temp:
+        heater_status = "off"
 
     # if heater should be on turn it on otherwise don't
-    if heater_status == "on":
-        asyncio.run(turnHeaterOn())
-
-    if heater_status == "off":
-        asyncio.run(turnHeaterOff())
+    if previous_heater_status != heater_status:
+        if heater_status == "on":
+            asyncio.run(turnHeaterOn())
+        if heater_status == "off":
+            asyncio.run(turnHeaterOff())
 
     epoch_time = int(time.time())
 

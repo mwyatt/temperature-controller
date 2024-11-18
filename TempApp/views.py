@@ -67,7 +67,8 @@ def getTempHistory(request):
     temperature_history = []
     heater_status_history = []
     for temp_history_row in temp_history:
-        time_history.append(temp_history_row.time_created)
+        # convert epoch time to human readable hours, minutes and seconds
+        time_history.append(time.strftime('%H:%M:%S', time.localtime(temp_history_row.time_created)))
         temperature_history.append(temp_history_row.current_temp)
         heater_status_history.append(temp_history_row.heater_on)
 

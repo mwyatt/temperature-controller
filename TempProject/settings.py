@@ -31,6 +31,8 @@ SECRET_KEY = 'django-insecure-=jzt4k9@t#_hvjbji$2g&%k%$-#844j$mbvy07y=20b!wd-r8l
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
     'temperature-controller.local',
     '192.168.1.227'
 ]
